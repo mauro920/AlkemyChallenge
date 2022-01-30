@@ -9,8 +9,8 @@ import com.example.alkmovies.repository.MovieRepo
 import kotlinx.coroutines.Dispatchers
 
 class MovieViewModel(private val repo: MovieRepo): ViewModel() {
-    private var page = 1
-    fun fetchMovies() = liveData(viewModelScope.coroutineContext + Dispatchers.Main){
+
+    fun fetchMovies(page:Int) = liveData(viewModelScope.coroutineContext + Dispatchers.Main){
         emit(Result.Loading())
         try {
             emit(Result.Success(repo.getMovies(page)))

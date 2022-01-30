@@ -19,6 +19,7 @@ import com.example.alkmovies.repository.MovieRepoImpl
 import com.example.alkmovies.repository.RetrofitClient
 import com.example.alkmovies.ui.movie.adapters.MovieAdapter
 
+
 class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieClickListener {
 
     private lateinit var binding: FragmentMovieBinding
@@ -61,9 +62,9 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         })
     }
 
-    override fun onMovieClick(movie: Movie) {
+    override fun onMovieClick(movie: Movie?) {
         val action = MovieFragmentDirections.actionMovieFragmentToMovieDetailsFragment(
-            movie.poster_path,
+            movie!!.poster_path,
             movie.backdrop_path,
             movie.vote_average.toFloat(),
             movie.vote_count,
@@ -74,5 +75,6 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         )
         findNavController().navigate(action)
     }
-
+    private fun addNullPoint(){
+    }
 }

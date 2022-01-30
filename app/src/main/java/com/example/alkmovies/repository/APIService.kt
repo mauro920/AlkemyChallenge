@@ -10,11 +10,11 @@ import retrofit2.http.Query
 
 interface APIService {
     @GET("movie/popular")
-    suspend fun getMovies(@Query("api_key")apiKey: String): MovieList
+    suspend fun getMovies(@Query("api_key") apiKey: String, @Query("page") page: Int): MovieList
 }
 
-object RetrofitClient{
-    val apiservice by lazy{
+object RetrofitClient {
+    val apiservice by lazy {
         Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))

@@ -11,12 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:visibility="gone"/>
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMovieList"
@@ -39,5 +33,11 @@
             android:layout_marginStart="32dp"
             android:layout_marginEnd="16dp"
             android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
     </LinearLayout>
 </ScrollView>

@@ -3,6 +3,8 @@ package com.example.alkmovies.ui.movie
 import MovieAdapter
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -50,10 +52,12 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
                 val visibleItemCount = layoutManager.childCount
                 val pastVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
                 val total = adapter.itemCount
-
-                if (!isLoading) {
-                    if ((visibleItemCount + pastVisibleItem) >= total) {
-                        adaptMovies()
+                if (dy > 0) {
+                    if (!isLoading) {
+                        if ((visibleItemCount + pastVisibleItem) >= total) {
+                            ++page
+                            adaptMovies()
+                        }
                     }
                 }
                 super.onScrolled(recyclerView, dx, dy)
@@ -75,69 +79,52 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         findNavController().navigate(action)
     }
 
+    private fun handAdapter() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (::adapter.isInitialized) {
+                adapter.updateList(moviesList)
+                binding.rvMovieList.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+                binding.tvError.visibility = View.GONE
+                isLoading = false
+            } else {
+                adapter = MovieAdapter(moviesList, this)
+                binding.rvMovieList.adapter = adapter
+                binding.rvMovieList.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+                binding.tvError.visibility = View.GONE
+                isLoading = false
+            }
+        }, 3000)
+    }
+
     @SuppressLint("SetTextI18n")
     private fun adaptMovies() {
         binding.progressBar.visibility = View.VISIBLE
 
         viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
-            if (::adapter.isInitialized) {
-                when (movies) {
-                    is Result.Loading -> {
-                        isLoading = true
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.tvError.visibility = View.GONE
-                        Log.d("LiveData", "LOADING...")
-                    }
-                    is Result.Success -> {
-                        ++page
-                        movies.data.results.forEach {
-                            moviesList.add(it)
-                        }
-                        binding.progressBar.visibility = View.GONE
-                        adapter.updateList(moviesList)
-                        isLoading = false
-                        Log.d("LiveData", "${movies.data}")
-
-                    }
-                    is Result.Failure -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.visibility = View.VISIBLE
-                        binding.rvMovieList.visibility = View.GONE
-                        binding.tvError.text = "Error: ${movies.exception}"
-                        isLoading = false
-                        Log.d("LiveData", "${movies.exception}")
-                    }
+            when (movies) {
+                is Result.Loading -> {
+                    isLoading = true
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.tvError.visibility = View.GONE
+                    Log.d("LiveData", "LOADING...")
                 }
-            } else {
-                when (movies) {
-                    is Result.Loading -> {
-                        isLoading = true
-                        binding.tvError.visibility = View.GONE
-                        binding.rvMovieList.visibility = View.GONE
-                        Log.d("LiveData", "LOADING...")
+                is Result.Success -> {
+                    movies.data.results.forEach {
+                        moviesList.add(it)
                     }
-                    is Result.Success -> {
-                        movies.data.results.forEach {
-                            moviesList.add(it)
-                        }
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.visibility = View.GONE
-                        binding.rvMovieList.visibility = View.VISIBLE
-                        adapter = MovieAdapter(movies.data.results, this)
-                        binding.rvMovieList.adapter = adapter
-                        isLoading = false
-                        ++page
-                        Log.d("LiveData", "${movies.data}")
+                    handAdapter()
+                    Log.d("LiveData", "${movies.data}")
 
-                    }
-                    is Result.Failure -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.visibility = View.VISIBLE
-                        binding.rvMovieList.visibility = View.GONE
-                        binding.tvError.text = "Error: ${movies.exception}"
-                        isLoading = false
-                        Log.d("LiveData", "${movies.exception}")
-                    }
+                }
+                is Result.Failure -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.tvError.visibility = View.VISIBLE
+                    binding.rvMovieList.visibility = View.GONE
+                    binding.tvError.text = "Error: ${movies.exception}"
+                    isLoading = false
+                    Log.d("LiveData", "${movies.exception}")
                 }
             }
         })

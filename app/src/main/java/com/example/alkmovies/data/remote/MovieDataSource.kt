@@ -6,5 +6,5 @@ import com.example.alkmovies.utils.Constants
 
 class MovieDataSource(private val apiService: APIService) {
 
-    suspend fun getMovies(): MovieList = apiService.getMovies(Constants.API_KEY)
+    suspend fun getMovies(page: Int): MovieList = apiService.getMovies(Constants.API_KEY, page)
 }

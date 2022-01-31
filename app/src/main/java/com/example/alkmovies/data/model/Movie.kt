@@ -18,6 +18,6 @@ data class Movie(
     val vote_count: Int = -1)
 
 data class MovieList(
-    val results: List<Movie> = listOf(),
-    val page: Int = -1
+    val results: MutableList<Movie> = mutableListOf(),
+    val page: Int = 1
 )

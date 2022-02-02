@@ -14,6 +14,7 @@ class MovieViewModel(private val repo: MovieRepo): ViewModel() {
         emit(Result.Loading())
         try {
             emit(Result.Success(repo.getMovies(page)))
+
         } catch (e: Exception){
             emit(Result.Failure(e))
         }

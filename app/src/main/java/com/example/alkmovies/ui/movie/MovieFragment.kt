@@ -49,12 +49,10 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
 
         binding.rvMovieList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val visibleItemCount = layoutManager.childCount
-                val pastVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
-                val total = adapter.itemCount
+                val pastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
                 if (dy > 0) {
                     if (!isLoading) {
-                        if ((visibleItemCount + pastVisibleItem) >= total) {
+                        if (pastVisibleItem == moviesList.size - 1) {
                             ++page
                             adaptMovies()
                         }
@@ -82,7 +80,7 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
     private fun handAdapter() {
         Handler(Looper.getMainLooper()).postDelayed({
             if (::adapter.isInitialized) {
-                adapter.updateList(moviesList)
+                adapter.notifyDataSetChanged()
                 binding.rvMovieList.visibility = View.VISIBLE
                 binding.progressBar.visibility = View.GONE
                 binding.tvError.visibility = View.GONE

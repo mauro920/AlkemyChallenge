@@ -1,3 +1,4 @@
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +8,6 @@ import com.bumptech.glide.Glide
 import com.example.alkmovies.core.BaseViewHolder
 import com.example.alkmovies.data.model.Movie
 import com.example.alkmovies.databinding.MovieItemBinding
-import com.example.alkmovies.utils.DiffCallback
 
 class MovieAdapter(
     private var moviesList: MutableList<Movie>,
@@ -50,13 +50,12 @@ class MovieAdapter(
                 .centerCrop().into(binding.imgMovie)
         }
     }
-    fun updateList(newMovies: MutableList<Movie>) {
-
-        val diffCallback = DiffCallback(this.moviesList, newMovies)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        diffResult.dispatchUpdatesTo(this)
-
-        this.moviesList = newMovies
-    }
+//    fun updateList(newMovies: MutableList<Movie>) {
+//
+//        val diffCallback = DiffCallback(this.moviesList, newMovies)
+//        DiffUtil.calculateDiff(diffCallback)
+//        .dispatchUpdatesTo(this)
+//        this.moviesList = newMovies
+//    }
 
 }

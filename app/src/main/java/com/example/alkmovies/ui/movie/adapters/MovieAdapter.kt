@@ -8,9 +8,9 @@ import com.bumptech.glide.Glide
 import com.example.alkmovies.core.BaseViewHolder
 import com.example.alkmovies.data.model.Movie
 import com.example.alkmovies.databinding.MovieItemBinding
-
+//ADAPTER FOR MOVIE'S ITEM
 class MovieAdapter(
-    private var moviesList: MutableList<Movie>,
+    private var moviesList: List<Movie>,
     private val itemClickListener: OnMovieClickListener
 ) : RecyclerView.Adapter<BaseViewHolder<*>>() {
 
@@ -50,12 +50,4 @@ class MovieAdapter(
                 .centerCrop().into(binding.imgMovie)
         }
     }
-//    fun updateList(newMovies: MutableList<Movie>) {
-//
-//        val diffCallback = DiffCallback(this.moviesList, newMovies)
-//        DiffUtil.calculateDiff(diffCallback)
-//        .dispatchUpdatesTo(this)
-//        this.moviesList = newMovies
-//    }
-
 }

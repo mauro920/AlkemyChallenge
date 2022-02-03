@@ -8,12 +8,13 @@ import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.alkmovies.R
 import com.example.alkmovies.databinding.FragmentMovieDetailsBinding
-
+//Fragment for Movies Details
 class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
 
     private lateinit var binding: FragmentMovieDetailsBinding
     private val args by navArgs<MovieDetailsFragmentArgs>()
 
+    //Setup of Args
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

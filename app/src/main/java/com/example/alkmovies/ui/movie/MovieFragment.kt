@@ -22,16 +22,15 @@ import com.example.alkmovies.presentation.MovieViewModel
 import com.example.alkmovies.presentation.MovieViewModelFactory
 import com.example.alkmovies.repository.MovieRepoImpl
 import com.example.alkmovies.repository.RetrofitClient
+import com.example.alkmovies.utils.Utils.adapter
+import com.example.alkmovies.utils.Utils.isLoading
+import com.example.alkmovies.utils.Utils.layoutManager
+import com.example.alkmovies.utils.Utils.moviesList
+import com.example.alkmovies.utils.Utils.page
 
-
+//Fragment who contains a RecyclerView, who contains all the movies.
 class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieClickListener {
-
-    lateinit var layoutManager: GridLayoutManager
-    lateinit var adapter: MovieAdapter
     private lateinit var binding: FragmentMovieBinding
-    private var isLoading = false
-    private var page = 1
-    private var moviesList: MutableList<Movie> = mutableListOf()
     private val viewModel by viewModels<MovieViewModel> {
         MovieViewModelFactory(
             MovieRepoImpl(
@@ -45,24 +44,13 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         binding = FragmentMovieBinding.bind(view)
         layoutManager = GridLayoutManager(activity, 3)
         binding.rvMovieList.layoutManager = layoutManager
-        adaptMovies()
-
-        binding.rvMovieList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val pastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
-                if (dy > 0) {
-                    if (!isLoading) {
-                        if (pastVisibleItem == moviesList.size - 1) {
-                            ++page
-                            adaptMovies()
-                        }
-                    }
-                }
-                super.onScrolled(recyclerView, dx, dy)
-            }
-        })
+        adapter = MovieAdapter(moviesList, this)
+        binding.rvMovieList.adapter = adapter
+        loadMovies()
+        onScrollUpdate()
     }
 
+    //Function for navigation and sending arguments(safeargs) to details fragment
     override fun onMovieClick(movie: Movie) {
         val action = MovieFragmentDirections.actionMovieFragmentToMovieDetailsFragment(
             movie.poster_path,
@@ -77,54 +65,61 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         findNavController().navigate(action)
     }
 
-    private fun handAdapter() {
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (::adapter.isInitialized) {
-                adapter.notifyDataSetChanged()
-                binding.rvMovieList.visibility = View.VISIBLE
-                binding.progressBar.visibility = View.GONE
-                binding.tvError.visibility = View.GONE
-                isLoading = false
-            } else {
-                adapter = MovieAdapter(moviesList, this)
-                binding.rvMovieList.adapter = adapter
-                binding.rvMovieList.visibility = View.VISIBLE
-                binding.progressBar.visibility = View.GONE
-                binding.tvError.visibility = View.GONE
-                isLoading = false
-            }
-        }, 3000)
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun adaptMovies() {
-        binding.progressBar.visibility = View.VISIBLE
-
-        viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
-            when (movies) {
-                is Result.Loading -> {
-                    isLoading = true
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.tvError.visibility = View.GONE
-                    Log.d("LiveData", "LOADING...")
-                }
-                is Result.Success -> {
-                    movies.data.results.forEach {
-                        moviesList.add(it)
+    //Scroll navigation function, where on reaching the last item, reload a new page.
+    private fun onScrollUpdate() {
+        binding.rvMovieList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val pastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
+                if (!isLoading) {
+                    if (pastVisibleItem == moviesList.size - 1) {
+                        loadMovies()
                     }
-                    handAdapter()
-                    Log.d("LiveData", "${movies.data}")
-
                 }
-                is Result.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.tvError.visibility = View.VISIBLE
-                    binding.rvMovieList.visibility = View.GONE
-                    binding.tvError.text = "Error: ${movies.exception}"
-                    isLoading = false
-                    Log.d("LiveData", "${movies.exception}")
-                }
+                super.onScrolled(recyclerView, dx, dy)
             }
         })
+    }
+
+    //Function who adds items, and refresh, to the adapter's list.
+    private fun addMovies(movies: List<Movie>) {
+        moviesList.addAll(movies)
+        adapter.notifyDataSetChanged()
+    }
+
+    //This, is the main function of the fragment, makes the call, to the api, and control
+    //the layout items, has a handler, to give it a delay.
+    @SuppressLint("SetTextI18n")
+    private fun loadMovies() {
+        binding.progressBar.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
+                when (movies) {
+                    is Result.Loading -> {
+                        isLoading = true
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.tvError.visibility = View.GONE
+                        Log.d("LiveData", "LOADING...")
+                    }
+                    is Result.Success -> {
+                        addMovies(movies.data.results)
+                        binding.rvMovieList.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.GONE
+                        binding.tvError.visibility = View.GONE
+                        isLoading = false
+                        page++
+                        Log.d("LiveData", "Success")
+
+                    }
+                    is Result.Failure -> {
+                        binding.progressBar.visibility = View.GONE
+                        binding.tvError.visibility = View.VISIBLE
+                        binding.rvMovieList.visibility = View.GONE
+                        binding.tvError.text = "Error: ${movies.exception}"
+                        isLoading = false
+                        Log.d("LiveData", "${movies.exception}")
+                    }
+                }
+            })
+        }, 3000)
     }
 }

@@ -1,6 +1,6 @@
 package com.example.alkmovies.data.model
 
-
+//Movies, and MovieList Models.
 data class Movie(
     val id: Int = -1,
     val adult: Boolean = false,
@@ -18,6 +18,6 @@ data class Movie(
     val vote_count: Int = -1)
 
 data class MovieList(
-    val results: MutableList<Movie> = mutableListOf(),
+    val results: List<Movie> = listOf(),
     val page: Int = 1
 )

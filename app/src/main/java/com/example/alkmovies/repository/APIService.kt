@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-
+//RETROFIT AND CALL TO THE API SERVICE
 interface APIService {
     @GET("movie/popular")
     suspend fun getMovies(@Query("api_key") apiKey: String, @Query("page") page: Int): MovieList

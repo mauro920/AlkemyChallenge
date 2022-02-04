@@ -3,8 +3,6 @@ package com.example.alkmovies.ui.movie
 import MovieAdapter
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -82,44 +80,44 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
 
     //Function who adds items, and refresh, to the adapter's list.
     private fun addMovies(movies: List<Movie>) {
-        moviesList.addAll(movies)
-        adapter.notifyDataSetChanged()
+
     }
 
     //This, is the main function of the fragment, makes the call, to the api, and control
     //the layout items, has a handler, to give it a delay.
     @SuppressLint("SetTextI18n")
     private fun loadMovies() {
-        binding.progressBar.visibility = View.VISIBLE
-        Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
-                when (movies) {
-                    is Result.Loading -> {
-                        isLoading = true
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.tvError.visibility = View.GONE
-                        Log.d("LiveData", "LOADING...")
-                    }
-                    is Result.Success -> {
-                        addMovies(movies.data.results)
-                        binding.rvMovieList.visibility = View.VISIBLE
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.visibility = View.GONE
-                        isLoading = false
-                        page++
-                        Log.d("LiveData", "Success")
-
-                    }
-                    is Result.Failure -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.visibility = View.VISIBLE
-                        binding.rvMovieList.visibility = View.GONE
-                        binding.tvError.text = "Error: ${movies.exception}"
-                        isLoading = false
-                        Log.d("LiveData", "${movies.exception}")
-                    }
+        viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
+            when (movies) {
+                //Make a LiveData result, loading status.
+                is Result.Loading -> {
+                    isLoading = true
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.tvError.visibility = View.GONE
+                    Log.d("LiveData", "LOADING...")
                 }
-            })
-        }, 3000)
+                //returns the movies, and updates all ui things. Return Success status.
+                is Result.Success -> {
+                    moviesList.addAll(movies.data.results)
+                    adapter.notifyDataSetChanged()
+                    binding.rvMovieList.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.GONE
+                    binding.tvError.visibility = View.GONE
+                    isLoading = false
+                    ++page
+                    Log.d("LiveData", "Success")
+
+                }
+                //Put the error in the screen.
+                is Result.Failure -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.tvError.visibility = View.VISIBLE
+                    binding.rvMovieList.visibility = View.GONE
+                    binding.tvError.text = "Error: ${movies.exception}"
+                    isLoading = false
+                    Log.d("LiveData", "${movies.exception}")
+                }
+            }
+        })
     }
 }

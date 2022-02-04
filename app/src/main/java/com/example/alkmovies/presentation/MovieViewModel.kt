@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 //ViewModel of the movie List fragment.
 class MovieViewModel(private val repo: MovieRepo): ViewModel() {
 //Function who fetch the movies, and emit a result.
-    fun fetchMovies(page:Int) = liveData(viewModelScope.coroutineContext + Dispatchers.Main){
+    fun fetchMovies(page:Int) = liveData(viewModelScope.coroutineContext + Dispatchers.IO){
         emit(Result.Loading())
         try {
             emit(Result.Success(repo.getMovies(page)))

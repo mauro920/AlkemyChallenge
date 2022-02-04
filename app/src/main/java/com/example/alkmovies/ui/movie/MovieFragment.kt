@@ -3,8 +3,6 @@ package com.example.alkmovies.ui.movie
 import MovieAdapter
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -15,8 +13,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alkmovies.R
 import com.example.alkmovies.core.Result
+import com.example.alkmovies.data.local.AppDatabase
+import com.example.alkmovies.data.local.LocalDataSource
 import com.example.alkmovies.data.model.Movie
-import com.example.alkmovies.data.remote.MovieDataSource
+import com.example.alkmovies.data.remote.RemoteMovieDataSource
 import com.example.alkmovies.databinding.FragmentMovieBinding
 import com.example.alkmovies.presentation.MovieViewModel
 import com.example.alkmovies.presentation.MovieViewModelFactory
@@ -34,7 +34,8 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
     private val viewModel by viewModels<MovieViewModel> {
         MovieViewModelFactory(
             MovieRepoImpl(
-                MovieDataSource(RetrofitClient.apiservice)
+                RemoteMovieDataSource(RetrofitClient.apiservice),
+                LocalDataSource(AppDatabase.getDatabase(requireContext()).movieDao())
             )
         )
     }
@@ -90,8 +91,6 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
     //the layout items, has a handler, to give it a delay.
     @SuppressLint("SetTextI18n")
     private fun loadMovies() {
-        binding.progressBar.visibility = View.VISIBLE
-        Handler(Looper.getMainLooper()).postDelayed({
             viewModel.fetchMovies(page).observe(viewLifecycleOwner, Observer { movies ->
                 when (movies) {
                     is Result.Loading -> {
@@ -120,6 +119,5 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
                     }
                 }
             })
-        }, 3000)
     }
 }

@@ -4,7 +4,7 @@ import com.example.alkmovies.data.model.MovieList
 import com.example.alkmovies.repository.APIService
 import com.example.alkmovies.utils.Constants
 
-class MovieDataSource(private val apiService: APIService) {
+class RemoteMovieDataSource(private val apiService: APIService) {
 //Search Movies trough the WEB/API.
     suspend fun getMovies(page: Int): MovieList = apiService.getMovies(Constants.API_KEY, page)
 }

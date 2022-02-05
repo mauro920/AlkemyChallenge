@@ -29,6 +29,8 @@ import com.example.alkmovies.utils.Utils.page
 //Fragment who contains a RecyclerView, who contains all the movies.
 class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieClickListener {
     private lateinit var binding: FragmentMovieBinding
+    //variable for verify, if is the first time that the fragment is opened.
+    private var fragmentInit = false
     private val viewModel by viewModels<MovieViewModel> {
         MovieViewModelFactory(
             MovieRepoImpl(
@@ -44,8 +46,14 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
         binding.rvMovieList.layoutManager = layoutManager
         adapter = MovieAdapter(moviesList, this)
         binding.rvMovieList.adapter = adapter
-        loadMovies()
-        onScrollUpdate()
+        //verify if is the first time that the fragment is opened.
+        if (fragmentInit){
+            onScrollUpdate()
+        } else {
+            loadMovies()
+            onScrollUpdate()
+            fragmentInit = true
+        }
     }
 
     //Function for navigation and sending arguments(safeargs) to details fragment
@@ -80,7 +88,8 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
 
     //Function who adds items, and refresh, to the adapter's list.
     private fun addMovies(movies: List<Movie>) {
-
+        moviesList.addAll(movies)
+        adapter.notifyDataSetChanged()
     }
 
     //This, is the main function of the fragment, makes the call, to the api, and control
@@ -98,8 +107,7 @@ class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieCli
                 }
                 //returns the movies, and updates all ui things. Return Success status.
                 is Result.Success -> {
-                    moviesList.addAll(movies.data.results)
-                    adapter.notifyDataSetChanged()
+                    addMovies(movies.data.results)
                     binding.rvMovieList.visibility = View.VISIBLE
                     binding.progressBar.visibility = View.GONE
                     binding.tvError.visibility = View.GONE
